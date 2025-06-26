@@ -17,8 +17,10 @@ const RootNavigator: React.FC = () => {
       setUserType(storedType);
       setIsLoading(false);
     };
-    checkUserType();
-  }, []);
+    if (isLoggedIn) {
+      checkUserType();
+    }
+  }, [isLoggedIn]);
 
   if (isLoading) return null;
   if (!isLoggedIn) return <AuthNavigator />;

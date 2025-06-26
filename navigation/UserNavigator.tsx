@@ -14,6 +14,7 @@ import SettingsScreen from '../screens/shared/SettingsScreen';
 import BookingScreen from '../screens/shared/BookingScreen';
 import FavoritesScreen from '../screens/user/FavoritesScreen';
 import EditProfileScreen from '../screens/user/EditProfileScreen';
+import AccountSettingsScreen from '../screens/user/AccountSettingsScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -58,6 +59,7 @@ const UserNavigator: React.FC = () => (
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen name="Favorites" component={FavoritesScreen} />
     <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
   </Stack.Navigator>
 );
 

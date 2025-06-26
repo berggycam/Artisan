@@ -121,12 +121,12 @@ const LoginScreen: React.FC = () => {
       setIsLoading(false);
       // Get userType from AsyncStorage
       const userType = await AsyncStorage.getItem('userType');
-      if (userType === 'artisan') {
-        navigation.replace('ArtisanDashboard');
+      if (userType === 'artisan' || userType === 'customer') {
+        // Ensure userType is set in AsyncStorage (simulate API response if needed)
+        await AsyncStorage.setItem('userType', userType);
+        // Only set isLoggedIn; RootNavigator will handle navigation
         setIsLoggedIn(true);
-      } else if (userType === 'customer') {
-        setIsLoggedIn(true);
-        // No manual navigation needed; RootNavigator will switch to UserNavigator automatically
+        navigation.navigate('Animation' as never);
       } else {
         Alert.alert('Error', 'User type not found.');
       }

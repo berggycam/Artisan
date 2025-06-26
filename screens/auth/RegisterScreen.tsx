@@ -157,6 +157,7 @@ const RegisterScreen: React.FC = () => {
       setIsLoading(false);
       // Save userType to AsyncStorage
       await AsyncStorage.setItem('userType', formData.userType);
+      // After registration, navigate to Login. Do NOT navigate directly to dashboards.
       Alert.alert('Success', 'Account created successfully!', [
         { text: 'OK', onPress: () => navigation.replace('Login') }
       ]);

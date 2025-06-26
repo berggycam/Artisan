@@ -17,6 +17,14 @@ This file tracks all changes, instructions, errors, and fixes for the Artisan Ap
 - **[UPDATE]** LoginScreen now checks userType after login and navigates to the correct home screen (ArtisanDashboard or Home).
 - **[ENHANCE]** ProfileScreen now uses a modal for logout confirmation. Logout updates global auth state (AuthContext), which triggers RootNavigator to switch to AuthNavigator and show WelcomeScreen.
 - **[ADD]** Implemented AuthContext for global authentication state and logout flow.
+- **[ADD]** Added new screens for artisans:
+  - **Account Settings** (profile, password, notifications, logout)
+  - **Account Details** (view artisan info)
+  - **Notifications** (modern notification list)
+  - **Settings** (notification preferences, theme, logout)
+- **[ENHANCE]** All new screens are accessible from the artisan dashboard (three-dots menu and bell icon).
+- **[ENHANCE]** Navigation is now consistent for both user and artisan flows.
+- **[ENHANCE]** All dashboard icons and stats use professional Ionicons.
 
 ---
 
@@ -47,3 +55,31 @@ This file tracks all changes, instructions, errors, and fixes for the Artisan Ap
 - If you encounter an error, document it in the Errors & Fixes section with the solution.
 - Use the To-Do section to track ongoing and future tasks.
 - Keep this file up to date for team transparency and onboarding.
+
+## Recent Changes
+- Added new screens for artisans:
+  - **Account Settings** (profile, password, notifications, logout)
+  - **Account Details** (view artisan info)
+  - **Notifications** (modern notification list)
+  - **Settings** (notification preferences, theme, logout)
+- All new screens are accessible from the artisan dashboard (three-dots menu and bell icon).
+- Navigation is now consistent for both user and artisan flows.
+- All dashboard icons and stats use professional Ionicons.
+
+## Next Steps
+- Connect Account Settings and Details to real backend/user data.
+- Implement notification fetching and display.
+- Add theme switching logic in Settings.
+- Polish UI for responsiveness and accessibility.
+- Add tests for navigation and screen rendering.
+
+## TODO (Next Steps)
+- [ ] Connect Account Settings and Account Details screens to real backend/user data (Firebase, API, etc.)
+- [ ] Implement notification fetching and display for artisans
+- [ ] Enable theme switching (light/dark mode) in Settings
+- [ ] Add edit functionality to Account Details (allow profile updates)
+- [ ] Improve error handling and user feedback throughout the app
+- [ ] Add tests for navigation, screen rendering, and user flows
+- [ ] Polish UI for responsiveness and accessibility (tablet/mobile, color contrast, etc.)
+- [ ] Review and refactor navigation for maintainability
+- [ ] Update documentation as new features are added

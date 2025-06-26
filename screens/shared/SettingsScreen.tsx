@@ -25,8 +25,8 @@ const SettingsScreen: React.FC = ({ navigation }: any) => {
       options: [
         {
           icon: 'person-outline',
-          label: 'Profile',
-          onPress: () => navigation.navigate('Profile'),
+          label: 'Account Settings',
+          onPress: () => navigation.navigate('AccountSettings'),
           color: undefined,
         },
       ],
