@@ -11,38 +11,19 @@ import {
   SafeAreaView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SearchBar from '../../components/inputs/SearchBar';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemedColors } from '../../constants/colors';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+const screenScale = width / 375;
+const responsiveSize = (size: number) => Math.max(size * screenScale, size * 0.85);
+const isSmallScreen = height < 700; // Same threshold as navigation
 
 const Tab = createBottomTabNavigator();
-
-// Warm, earthy color palette
-const COLORS = {
-  primary: '#D2691E',      // Chocolate/Sienna - warm primary
-  primaryLight: '#E6965C', // Lighter warm tone
-  primaryDark: '#A0522D',  // Darker earth tone
-  secondary: '#CD853F',    // Peru/Sandy brown
-  accent: '#8B4513',       // Saddle brown - deep earth
-  warm: '#F4A460',         // Sandy brown - warm highlight
-  text: {
-    primary: '#2F1B14',    // Dark brown
-    secondary: '#5D4037',  // Medium brown
-    tertiary: '#8D6E63',   // Light brown
-    white: '#FFFFFF'
-  },
-  background: {
-    primary: '#FFFEF7',    // Warm white
-    secondary: '#FBF8F3',  // Cream
-    tertiary: '#F5F1EA'    // Light beige
-  },
-  border: '#E8DDD4',       // Warm gray
-  success: '#8FBC8F',      // Dark sea green - earthy green
-  warning: '#DAA520',      // Goldenrod
-  error: '#CD5C5C'         // Indian red - earthy red
-};
 
 // Service categories with warm gradients
 const serviceCategories = [
@@ -50,28 +31,24 @@ const serviceCategories = [
     id: 'auto', 
     name: 'Auto & Transport', 
     icon: 'car-sport', 
-    gradient: [COLORS.primary, COLORS.primaryLight],
     services: ['Vulcanizers', 'Mechanics', 'Car Wash', 'Bike Repairs']
   },
   { 
     id: 'construction', 
     name: 'Construction', 
     icon: 'hammer', 
-    gradient: [COLORS.accent, COLORS.primaryDark],
     services: ['Welding', 'Carpentry', 'Masonry', 'Plumbing']
   },
   { 
     id: 'home', 
     name: 'Home Services', 
     icon: 'home', 
-    gradient: [COLORS.secondary, COLORS.warm],
     services: ['Tailors', 'Phone Repair', 'Locksmiths', 'Shoe Repair']
   },
   { 
     id: 'handyman', 
     name: 'Quick Fixes', 
     icon: 'build', 
-    gradient: [COLORS.warning, COLORS.secondary],
     services: ['Painters', 'TV/Antenna', 'Generator Repair', 'Electricians']
   },
 ];
@@ -139,6 +116,10 @@ const recentActivity = [
 ];
 
 const HomeScreen: React.FC = ({ navigation }: any) => {
+  const { currentTheme } = useTheme();
+  const colors = useThemedColors();
+  const insets = useSafeAreaInsets();
+  
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -157,63 +138,80 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
 
   const renderCategoryCard = ({ item }: { item: typeof serviceCategories[0] }) => (
     <TouchableOpacity 
-      style={styles.categoryCard}
+      style={[styles.categoryCard, {
+        shadowColor: colors.text.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+        elevation: 8,
+      }]}
       onPress={() => handleCategoryPress(item)}
       activeOpacity={0.8}
     >
       <LinearGradient
-        colors={item.gradient as [string, string]}
+        colors={currentTheme.gradient as [string, string, string]}
         style={styles.categoryGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.categoryIconContainer}>
-          <Ionicons name={item.icon as any} size={28} color={COLORS.text.white} />
+          <Ionicons name={item.icon as any} size={28} color="#FFFFFF" />
         </View>
-        <Text style={styles.categoryName}>{item.name}</Text>
-        <Text style={styles.categoryCount}>{item.services.length} services</Text>
+        <Text style={[styles.categoryName, { color: "#FFFFFF" }]}>{item.name}</Text>
+        <Text style={[styles.categoryCount, { color: "#FFFFFF" }]}>{item.services.length} services</Text>
       </LinearGradient>
     </TouchableOpacity>
   );
 
   const renderArtisanCard = ({ item }: { item: typeof featuredArtisans[0] }) => (
     <TouchableOpacity 
-      style={styles.artisanCard}
+      style={[styles.artisanCard, { 
+        backgroundColor: colors.background.primary,
+        borderColor: colors.border,
+        shadowColor: colors.text.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 6,
+      }]}
       onPress={() => handleArtisanPress(item)}
       activeOpacity={0.8}
     >
       <View style={styles.artisanHeader}>
         <View style={styles.artisanImageContainer}>
-          <View style={styles.artisanImagePlaceholder}>
-            <Ionicons name="person" size={32} color={COLORS.text.secondary} />
+          <View style={[styles.artisanImagePlaceholder, { 
+            backgroundColor: colors.background.secondary,
+            borderColor: colors.border,
+          }]}>
+            <Ionicons name="person" size={32} color={colors.text.primary} />
           </View>
-          {item.available && <View style={styles.availableDot} />}
+          {item.available && <View style={[styles.availableDot, { 
+            backgroundColor: colors.success,
+            borderColor: colors.background.primary,
+          }]} />}
         </View>
         
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={14} color={COLORS.warning} />
-          <Text style={styles.ratingText}>{item.rating}</Text>
+        <View style={[styles.ratingContainer, { backgroundColor: colors.background.secondary }]}>
+          <Ionicons name="star" size={14} color={colors.warning} />
+          <Text style={[styles.ratingText, { color: colors.text.primary }]}>{item.rating}</Text>
         </View>
       </View>
       
       <View style={styles.artisanInfo}>
         <View style={styles.artisanNameRow}>
-          <Text style={styles.artisanName}>{item.name}</Text>
-          {item.verified && (
-            <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
-          )}
+          <Text style={[styles.artisanName, { color: colors.text.primary }]}>{item.name}</Text>
+          {item.verified && <Ionicons name="checkmark-circle" size={16} color={colors.primary} />}
         </View>
-        
-        <Text style={styles.artisanSpecialty}>{item.specialty}</Text>
+        <Text style={[styles.artisanSpecialty, { color: colors.primary }]}>{item.specialty}</Text>
         
         <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={12} color={COLORS.text.secondary} />
-          <Text style={styles.artisanLocation}>{item.location}</Text>
+          <Ionicons name="location-outline" size={12} color={colors.text.secondary} />
+          <Text style={[styles.artisanLocation, { color: colors.text.secondary }]}>{item.location}</Text>
         </View>
         
         <View style={styles.artisanStats}>
-          <Text style={styles.jobsCompleted}>{item.jobs} jobs</Text>
-          <Text style={styles.priceRange}>{item.price}</Text>
+          <Text style={[styles.jobsCompleted, { color: colors.text.secondary }]}>{item.jobs} jobs</Text>
+          <Text style={[styles.priceRange, { color: colors.text.primary }]}>{item.price}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -221,58 +219,87 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
 
   const renderQuickService = ({ item }: { item: typeof quickServices[0] }) => (
     <TouchableOpacity 
-      style={[styles.quickServiceCard, item.urgent && styles.urgentService]}
+      style={[
+        styles.quickServiceCard, 
+        { 
+          backgroundColor: colors.background.primary,
+          borderColor: colors.border,
+          shadowColor: colors.text.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        },
+        item.urgent && { 
+          borderColor: colors.error,
+          backgroundColor: colors.error + '15',
+        }
+      ]}
       onPress={() => handleQuickServicePress(item)}
       activeOpacity={0.8}
     >
       <Ionicons 
         name={item.icon as any} 
         size={20} 
-        color={item.urgent ? COLORS.error : COLORS.primary} 
+        color={item.urgent ? colors.error : colors.primary} 
       />
-      <Text style={[styles.quickServiceText, item.urgent && styles.urgentText]}>
+      <Text style={[
+        styles.quickServiceText, 
+        { color: colors.text.primary },
+        item.urgent && { color: colors.error }
+      ]}>
         {item.name}
       </Text>
-      {item.urgent && <View style={styles.urgentDot} />}
+      {item.urgent && <View style={[styles.urgentDot, { backgroundColor: colors.error }]} />}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background.primary} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <StatusBar 
+        barStyle={currentTheme.id === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={colors.background.primary} 
+      />
       
       <ScrollView 
         style={styles.scrollContainer} 
         showsVerticalScrollIndicator={false}
         bounces={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
       >
         {/* Header Section with warm gradient */}
         <LinearGradient
-          colors={[COLORS.background.primary, COLORS.background.secondary]}
-          style={styles.header}
+          colors={currentTheme.gradient as [string, string, string]}
+          style={[styles.header, { borderBottomColor: colors.border }]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
           <View style={styles.headerTop}>
             <View style={styles.headerLeft}>
-              <Text style={styles.welcomeText}>Akwaaba! 👋</Text>
-              <Text style={styles.subtitle}>Find trusted artisans near you</Text>
+              <Text style={[styles.welcomeText, { color: "#FFFFFF" }]}>Akwaaba! 👋</Text>
+              <Text style={[styles.subtitle, { color: "#FFFFFF" }]}>Find trusted artisans near you</Text>
             </View>
             
             <View style={styles.headerRight}>
               <TouchableOpacity 
-                style={styles.headerButton}
+                style={[styles.headerButton, { 
+                  backgroundColor: "#FFFFFF20",
+                  borderColor: "#FFFFFF30",
+                }]}
                 onPress={() => navigation.navigate('Notifications')}
               >
-                <Ionicons name="notifications-outline" size={24} color={COLORS.text.primary} />
-                <View style={styles.notificationBadge} />
+                <Ionicons name="notifications-outline" size={24} color="#FFFFFF" />
+                <View style={[styles.notificationBadge, { backgroundColor: colors.error }]} />
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={styles.headerButton}
+                style={[styles.headerButton, { 
+                  backgroundColor: "#FFFFFF20",
+                  borderColor: "#FFFFFF30",
+                }]}
                 onPress={() => navigation.navigate('Profile')}
               >
-                <Ionicons name="person-circle-outline" size={24} color={COLORS.text.primary} />
+                <Ionicons name="person-circle-outline" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -286,7 +313,9 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Quick Actions</Text>
+          </View>
           
           <View style={styles.quickActions}>
             <TouchableOpacity 
@@ -294,14 +323,14 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               onPress={() => navigation.navigate('Bookings')}
             >
               <LinearGradient
-                colors={[COLORS.primary, COLORS.primaryLight]}
-                style={styles.quickActionIcon}
+                colors={currentTheme.gradient as [string, string, string]}
+                style={[styles.quickActionIcon, { shadowColor: colors.primary }]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="calendar-outline" size={24} color={COLORS.text.white} />
+                <Ionicons name="calendar-outline" size={24} color="#FFFFFF" />
               </LinearGradient>
-              <Text style={styles.quickActionText}>Bookings</Text>
+              <Text style={[styles.quickActionText, { color: colors.text.primary }]}>Bookings</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -309,14 +338,14 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               onPress={() => navigation.navigate('Messages')}
             >
               <LinearGradient
-                colors={[COLORS.accent, COLORS.primaryDark]}
-                style={styles.quickActionIcon}
+                colors={currentTheme.gradient as [string, string, string]}
+                style={[styles.quickActionIcon, { shadowColor: colors.primary }]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="chatbubble-outline" size={24} color={COLORS.text.white} />
+                <Ionicons name="chatbubble-outline" size={24} color="#FFFFFF" />
               </LinearGradient>
-              <Text style={styles.quickActionText}>Messages</Text>
+              <Text style={[styles.quickActionText, { color: colors.text.primary }]}>Messages</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -324,14 +353,14 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               onPress={() => navigation.navigate('Favorites')}
             >
               <LinearGradient
-                colors={[COLORS.secondary, COLORS.warm]}
-                style={styles.quickActionIcon}
+                colors={currentTheme.gradient as [string, string, string]}
+                style={[styles.quickActionIcon, { shadowColor: colors.primary }]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="heart-outline" size={24} color={COLORS.text.white} />
+                <Ionicons name="heart-outline" size={24} color="#FFFFFF" />
               </LinearGradient>
-              <Text style={styles.quickActionText}>Favorites</Text>
+              <Text style={[styles.quickActionText, { color: colors.text.primary }]}>Favorites</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -339,14 +368,14 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
               onPress={() => navigation.navigate('Emergency')}
             >
               <LinearGradient
-                colors={[COLORS.error, '#E8725C']}
-                style={styles.quickActionIcon}
+                colors={[colors.error, colors.error + '80']}
+                style={[styles.quickActionIcon, { shadowColor: colors.error }]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="flash-outline" size={24} color={COLORS.text.white} />
+                <Ionicons name="flash-outline" size={24} color="#FFFFFF" />
               </LinearGradient>
-              <Text style={styles.quickActionText}>Emergency</Text>
+              <Text style={[styles.quickActionText, { color: colors.text.primary }]}>Emergency</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -354,9 +383,9 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         {/* Service Categories */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Service Categories</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Service Categories</Text>
             <TouchableOpacity onPress={() => navigation.navigate('AllCategories')}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={[styles.seeAllText, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
           
@@ -373,9 +402,9 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         {/* Quick Services */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Need Help Now?</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Need Help Now?</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Emergency')}>
-              <Ionicons name="flash" size={20} color={COLORS.error} />
+              <Ionicons name="flash" size={20} color={colors.error} />
             </TouchableOpacity>
           </View>
           
@@ -392,9 +421,9 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         {/* Featured Artisans */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top Rated Artisans</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Top Rated Artisans</Text>
             <TouchableOpacity onPress={() => navigation.navigate('AllArtisans')}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={[styles.seeAllText, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
           
@@ -412,35 +441,43 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         {recentActivity.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Recent Activity</Text>
               <TouchableOpacity onPress={() => navigation.navigate('ActivityHistory')}>
-                <Text style={styles.seeAllText}>View All</Text>
+                <Text style={[styles.seeAllText, { color: colors.primary }]}>View All</Text>
               </TouchableOpacity>
             </View>
             
-            <View style={styles.activityContainer}>
+            <View style={[styles.activityContainer, { 
+              backgroundColor: colors.background.primary,
+              borderColor: colors.border,
+              shadowColor: colors.text.primary,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 4,
+            }]}>
               {recentActivity.map((activity, index) => (
                 <TouchableOpacity 
                   key={index} 
-                  style={styles.activityItem}
+                  style={[styles.activityItem, { borderBottomColor: colors.border }]}
                   onPress={() => navigation.navigate('ActivityDetails', { activity })}
                 >
                   <View style={styles.activityIcon}>
                     <Ionicons 
                       name={activity.type === 'booking' ? 'checkmark-circle' : 'chatbubble-ellipses'} 
                       size={20} 
-                      color={activity.status === 'completed' ? COLORS.success : COLORS.warning} 
+                      color={activity.status === 'completed' ? colors.success : colors.warning} 
                     />
                   </View>
                   <View style={styles.activityInfo}>
-                    <Text style={styles.activityTitle}>
+                    <Text style={[styles.activityTitle, { color: colors.text.primary }]}>
                       {activity.service} with {activity.artisan}
                     </Text>
-                    <Text style={styles.activityStatus}>
+                    <Text style={[styles.activityStatus, { color: colors.text.primary }]}>
                       {activity.status === 'completed' ? 'Completed' : 'Pending response'} • {activity.time}
                     </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={COLORS.text.tertiary} />
+                  <Ionicons name="chevron-forward" size={16} color={colors.text.primary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -448,7 +485,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         )}
 
         {/* Optional: add a little space above the tab bar */}
-        <View style={{ height: 16 }} />
+        <View style={{ height: isSmallScreen ? 80 : 120 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -457,7 +494,6 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
   },
   scrollContainer: {
     flex: 1,
@@ -467,7 +503,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 24,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   headerTop: {
     flexDirection: 'row',
@@ -486,20 +521,15 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 28,
     fontWeight: '700',
-    color: COLORS.text.primary,
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.text.secondary,
   },
   headerButton: {
     position: 'relative',
     padding: 8,
-    backgroundColor: COLORS.background.tertiary,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   notificationBadge: {
     position: 'absolute',
@@ -507,7 +537,6 @@ const styles = StyleSheet.create({
     right: 6,
     width: 8,
     height: 8,
-    backgroundColor: COLORS.error,
     borderRadius: 4,
   },
   searchBar: {
@@ -526,17 +555,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: COLORS.text.primary,
   },
   seeAllText: {
     fontSize: 14,
-    color: COLORS.primary,
     fontWeight: '600',
   },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 8,
   },
   quickAction: {
     alignItems: 'center',
@@ -549,7 +575,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-    shadowColor: COLORS.accent,
+    shadowColor: '#8B4513',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -557,7 +583,6 @@ const styles = StyleSheet.create({
   },
   quickActionText: {
     fontSize: 12,
-    color: COLORS.text.primary,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -568,11 +593,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: COLORS.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   categoryGradient: {
     width: 140,
@@ -585,14 +605,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryName: {
-    color: COLORS.text.white,
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 4,
   },
   categoryCount: {
-    color: COLORS.text.white,
+    color: '#FFFFFF',
     fontSize: 12,
     opacity: 0.9,
   },
@@ -602,32 +622,17 @@ const styles = StyleSheet.create({
   quickServiceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 24,
     marginRight: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
     position: 'relative',
-    shadowColor: COLORS.text.secondary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  urgentService: {
-    borderColor: COLORS.error,
-    backgroundColor: '#FDF2F2',
   },
   quickServiceText: {
     marginLeft: 8,
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.text.primary,
-  },
-  urgentText: {
-    color: COLORS.error,
   },
   urgentDot: {
     position: 'absolute',
@@ -635,21 +640,17 @@ const styles = StyleSheet.create({
     right: -2,
     width: 8,
     height: 8,
-    backgroundColor: COLORS.error,
     borderRadius: 4,
   },
   artisansContainer: {
     paddingRight: 20,
   },
   artisanCard: {
-    backgroundColor: COLORS.background.primary,
     borderRadius: 16,
     padding: 16,
     marginRight: 16,
     width: 200,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: COLORS.text.secondary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -667,12 +668,10 @@ const styles = StyleSheet.create({
   artisanImagePlaceholder: {
     width: 48,
     height: 48,
-    backgroundColor: COLORS.background.tertiary,
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
   availableDot: {
     position: 'absolute',
@@ -680,15 +679,12 @@ const styles = StyleSheet.create({
     right: 0,
     width: 14,
     height: 14,
-    backgroundColor: COLORS.success,
     borderRadius: 7,
     borderWidth: 2,
-    borderColor: COLORS.background.primary,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background.tertiary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -696,8 +692,6 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 12,
     fontWeight: '600',
-    color: COLORS.text.primary,
-    marginLeft: 4,
   },
   artisanInfo: {
     alignItems: 'flex-start',
@@ -711,11 +705,9 @@ const styles = StyleSheet.create({
   artisanName: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.text.primary,
   },
   artisanSpecialty: {
     fontSize: 14,
-    color: COLORS.primary,
     fontWeight: '600',
     marginBottom: 6,
   },
@@ -726,7 +718,6 @@ const styles = StyleSheet.create({
   },
   artisanLocation: {
     fontSize: 12,
-    color: COLORS.text.secondary,
     marginLeft: 4,
   },
   artisanStats: {
@@ -736,21 +727,16 @@ const styles = StyleSheet.create({
   },
   jobsCompleted: {
     fontSize: 12,
-    color: COLORS.text.secondary,
     fontWeight: '500',
   },
   priceRange: {
     fontSize: 12,
-    color: COLORS.text.primary,
     fontWeight: '600',
   },
   activityContainer: {
-    backgroundColor: COLORS.background.primary,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border,
     overflow: 'hidden',
-    shadowColor: COLORS.text.secondary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -762,7 +748,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   activityIcon: {
     marginRight: 12,
@@ -773,12 +758,9 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.text.primary,
-    marginBottom: 2,
   },
   activityStatus: {
     fontSize: 12,
-    color: COLORS.text.secondary,
   },
 });
 

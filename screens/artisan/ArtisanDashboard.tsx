@@ -10,7 +10,8 @@ import {
   Animated,
   Image,
   Modal,
-  Pressable
+  Pressable,
+  SafeAreaView
 } from 'react-native';
 import Avatar from '../../components/shared/Avatar';
 import StarRating from '../../components/shared/StarRating';
@@ -27,7 +28,7 @@ import Svg, {
   Rect,
   ClipPath
 } from 'react-native-svg';
-import colors from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 
@@ -187,6 +188,7 @@ const ModernActionButton = ({ title, subtitle, icon, onPress, colors, delay = 0 
 };
 
 const ArtisanDashboard: React.FC = () => {
+  const { currentTheme } = useTheme();
   const navigation = useNavigation<any>();
   const { logout } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -198,9 +200,15 @@ const ArtisanDashboard: React.FC = () => {
     specialty: 'Master Mason',
     avatarUri: undefined,
     rating: 4.8,
-    completedJobs: 127,
-    activeProjects: 5,
-    clientRating: 4.9,
+    totalJobs: 127,
+    totalEarnings: 15420,
+    completedJobs: 89,
+    pendingJobs: 12,
+    cancelledJobs: 3,
+    averageRating: 4.8,
+    totalReviews: 67,
+    responseRate: 98,
+    responseTime: '2.3 min',
   };
 
   useEffect(() => {
@@ -218,273 +226,339 @@ const ArtisanDashboard: React.FC = () => {
     ]).start();
   }, []);
 
+  const statsData = [
+    {
+      title: 'Total Jobs',
+      value: artisan.totalJobs.toString(),
+      icon: <Ionicons name="briefcase" size={24} color="#FFFFFF" />,
+      color: [currentTheme.colors.primary, currentTheme.colors.secondary],
+    },
+    {
+      title: 'Earnings',
+      value: `₵${artisan.totalEarnings.toLocaleString()}`,
+      icon: <Ionicons name="cash" size={24} color="#FFFFFF" />,
+      color: [currentTheme.colors.success, currentTheme.colors.warning],
+    },
+    {
+      title: 'Rating',
+      value: artisan.averageRating.toString(),
+      icon: <Ionicons name="star" size={24} color="#FFFFFF" />,
+      color: [currentTheme.colors.warning, currentTheme.colors.accent],
+    },
+  ];
+
+  const actionButtons = [
+    {
+      title: 'Job Requests',
+      subtitle: 'View and respond to new requests',
+      icon: <Ionicons name="notifications" size={24} color="#FFFFFF" />,
+      onPress: () => navigation.navigate('JobRequests'),
+      colors: [currentTheme.colors.primary, currentTheme.colors.secondary],
+      delay: 100,
+    },
+    {
+      title: 'Manage Portfolio',
+      subtitle: 'Update your work and services',
+      icon: <Ionicons name="images" size={24} color="#FFFFFF" />,
+      onPress: () => navigation.navigate('ManagePortfolio'),
+      colors: [currentTheme.colors.accent, currentTheme.colors.primary],
+      delay: 200,
+    },
+    {
+      title: 'Earnings Analytics',
+      subtitle: 'Track your income and performance',
+      icon: <Ionicons name="analytics" size={24} color="#FFFFFF" />,
+      onPress: () => navigation.navigate('EarningsAnalytics'),
+      colors: [currentTheme.colors.success, currentTheme.colors.warning],
+      delay: 300,
+    },
+    {
+      title: 'Review Clients',
+      subtitle: 'Rate and review your clients',
+      icon: <Ionicons name="people" size={24} color="#FFFFFF" />,
+      onPress: () => navigation.navigate('ReviewClients'),
+      colors: [currentTheme.colors.warning, currentTheme.colors.accent],
+      delay: 400,
+    },
+  ];
+
   return (
-    <LinearGradient
-      colors={[colors.tanLight, colors.tan, colors.tanDark]}
-      style={styles.gradientBg}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      <StatusBar barStyle="light-content" backgroundColor="#667eea" />
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+      <StatusBar 
+        barStyle={currentTheme.id === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={currentTheme.colors.background} 
+      />
       
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
-        showsVerticalScrollIndicator={false}
+      <Animated.View 
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }
+        ]}
       >
-        {/* Profile Section */}
-        <Animated.View 
-          style={[
-            styles.profileSection,
-            { paddingTop: 16 },
-          ]}
-        >
-          {/* Top row: Three Dots Menu (left) and Notification Bell (right) */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 8, marginTop: 2, justifyContent: 'space-between' }}>
-            <TouchableOpacity onPress={() => setMenuVisible(true)} style={{ padding: 8 }}>
-              <Ionicons name="ellipsis-vertical" size={24} color={colors.brownDark} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('NotificationsScreen')} style={{ padding: 8 }}>
-              <Ionicons name="notifications-outline" size={26} color={colors.brownDark} />
-            </TouchableOpacity>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.greeting, { color: currentTheme.colors.text }]}>Good morning,</Text>
+            <Text style={[styles.artisanName, { color: currentTheme.colors.text }]}>{artisan.name}</Text>
           </View>
-          {/* Avatar below icons row */}
-          <View style={[styles.avatarSection, { marginTop: 12 }]}> 
-            <View style={styles.avatarShadow}>
-              <Avatar uri={artisan.avatarUri} size={110} />
-              <View style={styles.onlineIndicatorNew} />
-            </View>
-          </View>
-          {/* Account Settings Button */}
-          <TouchableOpacity
-            onPress={() => navigation.navigate('AccountSettings')}
-            style={{
-              marginTop: 16,
-              marginBottom: 8,
-              alignSelf: 'center',
-              borderRadius: 24,
-              overflow: 'hidden',
-              elevation: 3,
-              minWidth: 180,
-              maxWidth: 240,
-            }}
-            activeOpacity={0.85}
+          <TouchableOpacity 
+            style={[styles.menuButton, { backgroundColor: currentTheme.colors.surface }]}
+            onPress={() => setMenuVisible(true)}
           >
-            <LinearGradient
-              colors={[colors.bronze, colors.gold]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{ paddingVertical: 12, paddingHorizontal: 24, borderRadius: 24, alignItems: 'center' }}
-            >
-              <Text
-                style={{ color: '#fff', fontWeight: 'bold', fontSize: 16, letterSpacing: 0.5 }}
-                numberOfLines={1}
-                ellipsizeMode='tail'
-              >
-                Account Settings
-              </Text>
-            </LinearGradient>
+            <Ionicons name="menu" size={24} color={currentTheme.colors.text} />
           </TouchableOpacity>
-          {/* Menu Modal */}
-          <Modal
-            visible={menuVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setMenuVisible(false)}
-          >
-            <Pressable style={{ flex: 1 }} onPress={() => setMenuVisible(false)}>
-              <View style={{ position: 'absolute', top: 40, left: 24, backgroundColor: '#fff', borderRadius: 10, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 8, paddingVertical: 8, paddingHorizontal: 18, minWidth: 140 }}>
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigation.navigate('AccountSettings'); }} style={{ paddingVertical: 8 }}>
-                  <Text style={{ color: colors.brownDark, fontWeight: '600', fontSize: 15, letterSpacing: 0.5 }}>Account Details</Text>
-                </TouchableOpacity>
-                <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 4 }} />
-                <TouchableOpacity onPress={() => { setMenuVisible(false); navigation.navigate('SettingsScreen'); }} style={{ paddingVertical: 8 }}>
-                  <Text style={{ color: colors.bronze, fontWeight: '600', fontSize: 15, letterSpacing: 0.5 }}>Settings</Text>
-                </TouchableOpacity>
-                <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 4 }} />
-                <TouchableOpacity onPress={() => { setMenuVisible(false); logout(); }} style={{ paddingVertical: 8 }}>
-                  <Text style={{ color: '#E57373', fontWeight: '600', fontSize: 15, letterSpacing: 0.5 }}>Logout</Text>
-                </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Dashboard Illustration */}
+          <View style={styles.illustrationContainer}>
+            <ModernDashboardIllustration />
+          </View>
+
+          {/* Stats Cards */}
+          <View style={styles.statsContainer}>
+            {statsData.map((stat, index) => (
+              <StatsCard
+                key={stat.title}
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+              />
+            ))}
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.actionsContainer}>
+            <Text style={[styles.sectionTitle, { color: currentTheme.colors.text }]}>Quick Actions</Text>
+            {actionButtons.map((action, index) => (
+              <ModernActionButton
+                key={action.title}
+                title={action.title}
+                subtitle={action.subtitle}
+                icon={action.icon}
+                onPress={action.onPress}
+                colors={action.colors}
+                delay={action.delay}
+              />
+            ))}
+          </View>
+
+          {/* Recent Activity */}
+          <View style={styles.recentActivityContainer}>
+            <Text style={[styles.sectionTitle, { color: currentTheme.colors.text }]}>Recent Activity</Text>
+            <View style={[styles.activityCard, { backgroundColor: currentTheme.colors.surface }]}>
+              <View style={styles.activityItem}>
+                <View style={[styles.activityIcon, { backgroundColor: currentTheme.colors.primary + '20' }]}>
+                  <Ionicons name="checkmark-circle" size={20} color={currentTheme.colors.success} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={[styles.activityTitle, { color: currentTheme.colors.text }]}>Job Completed</Text>
+                  <Text style={[styles.activitySubtitle, { color: currentTheme.colors.textSecondary }]}>
+                    House painting project - ₵1,200 earned
+                  </Text>
+                  <Text style={[styles.activityTime, { color: currentTheme.colors.textSecondary }]}>2 hours ago</Text>
+                </View>
               </View>
-            </Pressable>
-          </Modal>
-          {/* Divider */}
-          <View style={styles.profileDivider} />
-          {/* Info */}
-          <View style={styles.profileInfoModern}>
-            <Text style={styles.profileNameModern}>{artisan.name}</Text>
-            <Text style={styles.profileSpecialtyModern}>{artisan.specialty}</Text>
-            <View style={styles.profileRatingModern}>
-              <StarRating rating={artisan.rating} />
-              <Text style={styles.profileRatingTextModern}>{artisan.rating}/5.0</Text>
+              
+              <View style={styles.activityItem}>
+                <View style={[styles.activityIcon, { backgroundColor: currentTheme.colors.warning + '20' }]}>
+                  <Ionicons name="star" size={20} color={currentTheme.colors.warning} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={[styles.activityTitle, { color: currentTheme.colors.text }]}>New Review</Text>
+                  <Text style={[styles.activitySubtitle, { color: currentTheme.colors.textSecondary }]}>
+                    5-star rating from Sarah M.
+                  </Text>
+                  <Text style={[styles.activityTime, { color: currentTheme.colors.textSecondary }]}>1 day ago</Text>
+                </View>
+              </View>
             </View>
           </View>
-        </Animated.View>
+        </ScrollView>
+      </Animated.View>
 
-        {/* Stats Section */}
-        <View style={styles.statsSection}>
-          <StatsCard 
-            title="Completed Jobs" 
-            value={artisan.completedJobs} 
-            icon={<Ionicons name="checkmark-done-circle-outline" size={24} color="#fff" />} 
-            color={[colors.gold, colors.bronze]}
-          />
-          <StatsCard 
-            title="Active Projects" 
-            value={artisan.activeProjects} 
-            icon={<Ionicons name="construct-outline" size={24} color="#fff" />} 
-            color={[colors.brownLight, colors.tanDark]}
-          />
-          <StatsCard 
-            title="Client Rating" 
-            value={artisan.clientRating} 
-            icon={<Ionicons name="star-outline" size={24} color="#fff" />} 
-            color={[colors.brown, colors.bronze]}
-          />
+      {/* Menu Modal */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+          <View style={[styles.menuModal, { backgroundColor: currentTheme.colors.background }]}>
+            <View style={styles.menuHeader}>
+              <Text style={[styles.menuTitle, { color: currentTheme.colors.text }]}>Menu</Text>
+              <TouchableOpacity onPress={() => setMenuVisible(false)}>
+                <Ionicons name="close" size={24} color={currentTheme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <TouchableOpacity 
+              style={[styles.menuItem, { borderBottomColor: currentTheme.colors.border }]}
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Settings');
+              }}
+            >
+              <Ionicons name="settings" size={20} color={currentTheme.colors.text} />
+              <Text style={[styles.menuItemText, { color: currentTheme.colors.text }]}>Settings</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.menuItem, { borderBottomColor: currentTheme.colors.border }]}
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Notifications');
+              }}
+            >
+              <Ionicons name="notifications" size={20} color={currentTheme.colors.text} />
+              <Text style={[styles.menuItemText, { color: currentTheme.colors.text }]}>Notifications</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.menuItem, { borderBottomColor: currentTheme.colors.border }]}
+              onPress={() => {
+                setMenuVisible(false);
+                logout();
+              }}
+            >
+              <Ionicons name="log-out" size={20} color={currentTheme.colors.error} />
+              <Text style={[styles.menuItemText, { color: currentTheme.colors.error }]}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        {/* Actions Section */}
-        <View style={styles.actionsSection}>
-          <ModernActionButton
-            title="Portfolio Manager"
-            subtitle="Showcase your best work"
-            icon={<Ionicons name="briefcase-outline" size={24} color="#fff" />}
-            colors={[colors.gold, colors.bronze]}
-            onPress={() => navigation.navigate('ManagePortfolio')}
-            delay={100}
-          />
-          
-          <ModernActionButton
-            title="Job Requests"
-            subtitle="New opportunities await"
-            icon={<Ionicons name="document-text-outline" size={24} color="#fff" />}
-            colors={[colors.brownLight, colors.tanDark]}
-            onPress={() => navigation.navigate('JobRequests')}
-            delay={200}
-          />
-          
-          <ModernActionButton
-            title="Client Reviews"
-            subtitle="Manage feedback & ratings"
-            icon={<Ionicons name="chatbubbles-outline" size={24} color="#fff" />}
-            colors={[colors.brown, colors.bronze]}
-            onPress={() => navigation.navigate('ReviewClients')}
-            delay={300}
-          />
-          
-          <ModernActionButton
-            title="Earnings & Analytics"
-            subtitle="Track your success"
-            icon={<Ionicons name="bar-chart-outline" size={24} color="#fff" />}
-            colors={[colors.brownLight, colors.tanDark]}
-            onPress={() => navigation.navigate('Analytics')}
-            delay={400}
-          />
-        </View>
-      </ScrollView>
-    </LinearGradient>
+      </Modal>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  gradientBg: {
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  artisanName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  menuButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingTop: 20,
     paddingBottom: 40,
   },
-  profileSection: {
+  illustrationContainer: {
     alignItems: 'center',
     marginBottom: 24,
-    paddingHorizontal: 20,
   },
-  profileCardWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  profileCardGlass: {
-    width: '100%',
-    borderRadius: 32,
-    paddingVertical: 32,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 32,
-    elevation: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(210,180,140,0.18)',
-    overflow: 'visible',
-  },
-  avatarSection: {
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  avatarShadow: {
-    shadowColor: colors.bronze,
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 8,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    padding: 6,
-    position: 'relative',
-  },
-  onlineIndicatorNew: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#4CAF50',
-    borderWidth: 3,
-    borderColor: '#fff',
-    zIndex: 2,
-  },
-  profileDivider: {
-    width: 60,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: 'rgba(210,180,140,0.18)',
-    marginVertical: 16,
-  },
-  profileInfoModern: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  profileNameModern: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: colors.brownDark,
-    marginBottom: 2,
-    letterSpacing: 0.5,
-  },
-  profileSpecialtyModern: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    color: colors.bronze,
-    marginBottom: 10,
-    opacity: 0.85,
-  },
-  profileRatingModern: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  profileRatingTextModern: {
-    fontSize: 16,
-    color: colors.bronze,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  statsSection: {
+  statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     marginBottom: 24,
+  },
+  actionsContainer: {
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  recentActivityContainer: {
+    paddingHorizontal: 20,
+  },
+  activityCard: {
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  activityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  activityTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  activitySubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '500',
+  },
+  activityTime: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  menuModal: {
+    width: '100%',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  menuTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  menuItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   statsCard: {
     flex: 1,
@@ -499,10 +573,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  statsIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
   statsValue: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -515,9 +585,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
     opacity: 0.9,
-  },
-  actionsSection: {
-    paddingHorizontal: 20,
   },
   actionButtonContainer: {
     marginBottom: 16,

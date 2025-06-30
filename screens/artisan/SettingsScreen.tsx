@@ -34,7 +34,7 @@ const SettingsScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Notification Preferences</Text>
           </View>
           <Text style={styles.sectionDesc}>Manage how you receive notifications.</Text>
-          <TouchableOpacity style={styles.sectionAction} onPress={() => {}}>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('NotificationSchedule')}>
             <Text style={styles.sectionActionText}>Manage</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
           </TouchableOpacity>
@@ -46,9 +46,87 @@ const SettingsScreen: React.FC = () => {
             <Ionicons name="color-palette-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
             <Text style={styles.sectionTitle}>App Theme</Text>
           </View>
-          <Text style={styles.sectionDesc}>Switch between light and dark mode.</Text>
-          <TouchableOpacity style={styles.sectionAction} onPress={() => {}}>
-            <Text style={styles.sectionActionText}>Change</Text>
+          <Text style={styles.sectionDesc}>Customize your app appearance and colors.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('ThemeCustomization')}>
+            <Text style={styles.sectionActionText}>Customize</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Data Export Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="download-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Export Data</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Download your information and data.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('DataExport')}>
+            <Text style={styles.sectionActionText}>Export</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Storage Management Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="folder-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Storage Management</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Manage your app storage and data usage.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('StorageManagement')}>
+            <Text style={styles.sectionActionText}>Manage</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Contact Support Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="chatbubble-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Contact Support</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Get help from our support team.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('ContactSupport')}>
+            <Text style={styles.sectionActionText}>Contact</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Rate App Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="star-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Rate the App</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Share your feedback and help us improve.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('RateApp')}>
+            <Text style={styles.sectionActionText}>Rate</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Report Bug Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="bug-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Report a Bug</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Help us identify and fix issues.</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('ReportBug')}>
+            <Text style={styles.sectionActionText}>Report</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
+          </TouchableOpacity>
+        </View>
+
+        {/* App Version Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionRow}>
+            <Ionicons name="information-circle-outline" size={22} color={colors.bronze} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>App Version</Text>
+          </View>
+          <Text style={styles.sectionDesc}>Version 2.1.0 (Build 421)</Text>
+          <TouchableOpacity style={styles.sectionAction} onPress={() => navigation.navigate('AppVersion')}>
+            <Text style={styles.sectionActionText}>Details</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.bronze} />
           </TouchableOpacity>
         </View>

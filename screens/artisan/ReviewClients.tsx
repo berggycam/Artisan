@@ -1,9 +1,10 @@
 // screens/artisan/ReviewClients.tsx
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, Animated, StatusBar, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Animated, StatusBar, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import StarRating from '../../components/shared/StarRating';
+import { useNavigation } from '@react-navigation/native';
 
 const mockReviews = [
   {
@@ -13,6 +14,7 @@ const mockReviews = [
     review: 'Fantastic craftsmanship and attention to detail. Highly recommended!',
     rating: 5,
     date: '2024-05-28',
+    jobType: 'Kitchen Renovation',
   },
   {
     id: '2',
@@ -21,6 +23,7 @@ const mockReviews = [
     review: 'Very professional and finished the job on time.',
     rating: 4,
     date: '2024-05-20',
+    jobType: 'Bathroom Remodel',
   },
   {
     id: '3',
@@ -29,10 +32,30 @@ const mockReviews = [
     review: 'Great communication and beautiful results. Will hire again!',
     rating: 5,
     date: '2024-05-15',
+    jobType: 'Living Room Design',
+  },
+  {
+    id: '4',
+    client: 'David Wilson',
+    avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+    review: 'Excellent work quality and very reasonable pricing.',
+    rating: 5,
+    date: '2024-05-10',
+    jobType: 'Deck Construction',
+  },
+  {
+    id: '5',
+    client: 'Emma Davis',
+    avatar: 'https://randomuser.me/api/portraits/women/23.jpg',
+    review: 'Professional, clean, and exceeded expectations.',
+    rating: 4,
+    date: '2024-05-05',
+    jobType: 'Fence Installation',
   },
 ];
 
 const ReviewClients: React.FC = () => {
+  const navigation = useNavigation<any>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
@@ -51,6 +74,8 @@ const ReviewClients: React.FC = () => {
     ]).start();
   }, []);
 
+  const averageRating = mockReviews.reduce((sum, review) => sum + review.rating, 0) / mockReviews.length;
+
   return (
     <LinearGradient
       colors={['#FFF8DC', '#FFEFD5', '#F5DEB3']}
@@ -59,6 +84,20 @@ const ReviewClients: React.FC = () => {
       end={{ x: 1, y: 1 }}
     >
       <StatusBar barStyle="dark-content" backgroundColor="#FFF8DC" />
+      
+      {/* Header with back button */}
+      <Animated.View style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="#8B4513" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Client Reviews</Text>
+        <View style={styles.headerSpacer} />
+      </Animated.View>
+
       {/* Decorative background elements */}
       <View style={styles.backgroundDecor} pointerEvents="none">
         <View style={[styles.decorCircle, styles.decorCircle1]} />
@@ -67,18 +106,30 @@ const ReviewClients: React.FC = () => {
         <View style={[styles.decorRing, styles.decorRing1]} />
         <View style={[styles.decorRing, styles.decorRing2]} />
       </View>
+
       <FlatList
         data={mockReviews}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.scrollContent}
         ListHeaderComponent={
           <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-            <Text style={styles.header}>Client Reviews</Text>
             <Text style={styles.subHeader}>See what your clients are saying about your work</Text>
+            
+            {/* Overall Rating Summary */}
+            <View style={styles.ratingSummary}>
+              <View style={styles.ratingSummaryContent}>
+                <Text style={styles.overallRating}>{averageRating.toFixed(1)}</Text>
+                <StarRating rating={averageRating} />
+                <Text style={styles.totalReviews}>{mockReviews.length} reviews</Text>
+              </View>
+            </View>
           </Animated.View>
         }
-        renderItem={({ item }) => (
-          <Animated.View style={styles.cardWrapper}>
+        renderItem={({ item, index }) => (
+          <Animated.View style={[styles.cardWrapper, { 
+            opacity: fadeAnim, 
+            transform: [{ translateY: slideAnim }]
+          }]}>
             <LinearGradient
               colors={["rgba(255,255,255,0.85)", "rgba(255,255,255,0.5)"]}
               style={styles.cardGlass}
@@ -89,6 +140,7 @@ const ReviewClients: React.FC = () => {
                 <Image source={{ uri: item.avatar }} style={styles.avatar} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.clientName}>{item.client}</Text>
+                  <Text style={styles.jobType}>{item.jobType}</Text>
                   <Text style={styles.reviewDate}>{item.date}</Text>
                 </View>
                 <StarRating rating={item.rating} />
@@ -108,26 +160,73 @@ const styles = StyleSheet.create({
   gradientBg: {
     flex: 1,
   },
-  scrollContent: {
-    paddingTop: 40,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-  },
   header: {
-    fontSize: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    zIndex: 10,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#CD853F',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  headerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#8B4513',
-    textAlign: 'center',
-    marginBottom: 6,
     letterSpacing: 0.5,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
   subHeader: {
     fontSize: 16,
     color: '#CD853F',
     textAlign: 'center',
-    marginBottom: 18,
+    marginBottom: 24,
     fontStyle: 'italic',
     opacity: 0.85,
+  },
+  ratingSummary: {
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#CD853F',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ratingSummaryContent: {
+    alignItems: 'center',
+  },
+  overallRating: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: 8,
+  },
+  totalReviews: {
+    fontSize: 14,
+    color: '#A0522D',
+    marginTop: 4,
+    opacity: 0.8,
   },
   cardWrapper: {
     marginBottom: 18,
@@ -145,7 +244,7 @@ const styles = StyleSheet.create({
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   avatar: {
     width: 48,
@@ -159,17 +258,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#8B4513',
   },
+  jobType: {
+    fontSize: 14,
+    color: '#CD853F',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
   reviewDate: {
     fontSize: 12,
-    color: '#CD853F',
+    color: '#A0522D',
     marginTop: 2,
+    opacity: 0.7,
   },
   reviewText: {
     fontSize: 15,
     color: '#A0522D',
     opacity: 0.9,
-    marginTop: 2,
-    marginBottom: 2,
+    lineHeight: 22,
   },
   emptyText: {
     textAlign: 'center',
